@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Ascend Math - Complete Bypass Suite
+// @name         Skip vids, mid vid quizzes, and idletimeout or smth.
 // @namespace    http://tampermonkey.net/
 // @version      3.0
 // @description  Skip videos, block quizzes, kill idle timeout - ALL IN ONE
-// @author       You
+// @author       WOB
 // @match        https://g.myascendmath.com/Ascend/contentPage.do*
 // @match        https://g.myascendmath.com/Ascend/html5NewVideoplayer.html*
 // @grant        none
@@ -14,7 +14,7 @@
 (function() {
     'use strict';
 
-    console.log('🚀 ASCEND MATH COMPLETE BYPASS SUITE v3.0 ACTIVATED 🚀');
+    console.log('ready');
 
     // ===== GLOBAL STATE =====
     let isQuizBlockingEnabled = false;
@@ -31,7 +31,7 @@
     window.setTimeout = function(...args) {
         const delay = args[1];
         if (delay === 30000 || delay === 60000 || delay === 300000 || delay === 600000) {
-            console.log('💀 Blocked idle timeout setTimeout:', delay + 'ms');
+            console.log('Blocked idle timeout setTimeout:', delay + 'ms');
             const dummyId = Math.random();
             idleTimers.push(dummyId);
             return dummyId;
@@ -42,7 +42,7 @@
     window.setInterval = function(...args) {
         const delay = args[1];
         if (delay === 30000 || delay === 60000) {
-            console.log('💀 Blocked idle monitoring interval:', delay + 'ms');
+            console.log('Blocked idle monitoring interval:', delay + 'ms');
             const dummyId = Math.random();
             idleIntervals.push(dummyId);
             return dummyId;
@@ -55,7 +55,7 @@
     window.fetch = function(...args) {
         const url = args[0]?.toString() || '';
         if (url.includes('idleTimeout') || url.includes('checkUserSession')) {
-            console.log('🛡️ Blocked idle request:', url);
+            console.log('Blocked idle request:', url);
             return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ sessionValid: true, timeout: false }) });
         }
         return originalFetch.apply(this, args);
@@ -66,10 +66,10 @@
         ['mousemove', 'keydown', 'click'].forEach(ev => {
             document.dispatchEvent(new Event(ev, { bubbles: true }));
         });
-        console.log('💓 Simulated activity');
+        console.log('Simulated activity');
     }, 45000);
 
-    console.log('💀 Idle timeout protection: ACTIVE');
+    console.log('Idle timeout protection: ACTIVE');
 
     // ===== BUTTON INJECTION =====
 
@@ -90,7 +90,7 @@
 
     function createSkipButton(video) {
         const btn = document.createElement('button');
-        btn.textContent = '⏭️ Skip Video';
+        btn.textContent = 'Skip Video';
         btn.id = 'ascend-skip-btn';
         btn.title = 'Ctrl+Shift+S';
         btn.style.cssText = `
@@ -107,7 +107,7 @@
         });
 
         document.body.appendChild(btn);
-        console.log('⏭️ Skip button: INJECTED');
+        console.log('Skip button: INJECTED');
     }
 
     function executeSkip(video) {
@@ -129,7 +129,7 @@
     function resetSkipButton() {
         const btn = document.getElementById('ascend-skip-btn');
         if (btn) {
-            btn.disabled = false; btn.textContent = '⏭️ Skip Video';
+            btn.disabled = false; btn.textContent = 'Skip Video';
             btn.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
         }
     }
@@ -138,7 +138,7 @@
 
     function createBlockButton() {
         const btn = document.createElement('button');
-        btn.textContent = '🛡️ Quizzes: OFF';
+        btn.textContent = 'Quizzes: OFF';
         btn.id = 'ascend-block-btn';
         btn.title = 'Ctrl+Shift+Q';
         btn.style.cssText = `
@@ -160,7 +160,7 @@
         });
 
         document.body.appendChild(btn);
-        console.log('🛡️ Block button: INJECTED');
+        console.log('Block button: INJECTED');
     }
 
     function toggleQuizBlocking(button) {
@@ -175,11 +175,11 @@
 
         if (isQuizBlockingEnabled) {
             player.showQuiz = function(quiz) {
-                console.log('🛡️ Quiz blocked:', quiz.question.substring(0, 50) + '...');
+                console.log('Quiz blocked:', quiz.question.substring(0, 50) + '...');
                 this.quizBlockUntil = this.video.currentTime + 1;
             };
             player.showPopup = function(popup) {
-                console.log('🛡️ Popup blocked:', popup.text.substring(0, 50) + '...');
+                console.log('Popup blocked:', popup.text.substring(0, 50) + '...');
                 this.popupBlockUntil = this.video.currentTime + 1;
                 if (this.currentPopup) setTimeout(() => this.hidePopup(), 100);
             };
@@ -188,15 +188,15 @@
             player.popups = [];
             $('#progressMarkers').empty();
 
-            button.textContent = '🛡️ Quizzes: ON';
+            button.textContent = 'Quizzes: ON';
             button.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-            showNotification('🛡️ Quizzes & popups BLOCKED', '#4CAF50');
+            showNotification('Quizzes & popups BLOCKED', '#4CAF50');
         } else {
             player.showQuiz = originalShowQuiz;
             player.showPopup = originalShowPopup;
-            button.textContent = '🛡️ Quizzes: OFF';
+            button.textContent = 'Quizzes: OFF';
             button.style.background = 'linear-gradient(135deg, #ff9800, #f57c00)';
-            showNotification('⚠️ Quizzes & popups ENABLED', '#ff9800');
+            showNotification('Quizzes & popups ENABLED', '#ff9800');
         }
     }
 
@@ -204,7 +204,7 @@
 
     function createIdleButton() {
         const btn = document.createElement('button');
-        btn.textContent = '💀 Idle: KILLED';
+        btn.textContent = 'Idle: KILLED';
         btn.id = 'ascend-idle-btn';
         btn.title = 'Click to manually trigger activity';
         btn.style.cssText = `
@@ -222,11 +222,11 @@
                 document.dispatchEvent(new Event(ev, { bubbles: true }));
             });
             btn.textContent = '✓ Activity Sent!';
-            setTimeout(() => btn.textContent = '💀 Idle: KILLED', 1000);
+            setTimeout(() => btn.textContent = 'Idle: KILLED', 1000);
         });
 
         document.body.appendChild(btn);
-        console.log('💀 Idle button: INJECTED');
+        console.log('Idle button: INJECTED');
     }
 
     // ===== NOTIFICATION SYSTEM =====
@@ -286,6 +286,6 @@
     // ===== INITIALIZE =====
 
     injectButtons();
-    console.log('🚀 ALL SYSTEMS ONLINE. ASCEND MATH IS NOW YOURS TO COMMAND! 🚀');
+    console.log('everything is up. gl brotha');
 
 })();
