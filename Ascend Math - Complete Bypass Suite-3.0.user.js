@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Skip vids, mid vid quizzes, and idletimeout or smth.
+// @name         hecker stuff
 // @namespace    http://tampermonkey.net/
 // @version      3.0
-// @description  Skip videos, block quizzes, kill idle timeout - ALL IN ONE
+// @description  Skip videos, block quizzes, kill idle timeout
 // @author       WOB
 // @match        https://g.myascendmath.com/Ascend/contentPage.do*
 // @match        https://g.myascendmath.com/Ascend/html5NewVideoplayer.html*
