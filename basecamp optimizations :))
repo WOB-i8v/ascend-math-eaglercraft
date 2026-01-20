@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         80FPS Ticker, 2hr/999 Stats for basecamp
+// @name         Basecamp stuff
 // @namespace    http://tampermonkey.net/
 // @version      3.0
 // @description  yessirrr
@@ -38,7 +38,7 @@
         const elements = {
             'aTimeData': '2:00',
             'tTimeData': '999',
-            'rankDisplay': 'Sigma'
+            'rankDisplay': 'idkwhattoputhere'
         };
 
         for (let [id, val] of Object.entries(elements)) {
@@ -49,7 +49,7 @@
         }
     };
 
-    // 3. GLOBAL BYPASSES & IMMORTALITY
+    // 3. GLOBAL BYPASSES 
     const initBypasses = () => {
         // Neutralize timers and locks
         window.startTimer = () => { console.log("[Sigma] Timer Blocked."); return false; };
