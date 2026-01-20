@@ -1,5 +1,4 @@
-open calculator whenever with ALt + Q.
-alt + e opens eaglercraft in basecamp.
+ALt + q opens calculator.
 alt + w opens the font changer.
 alt + r opens the player customizer.
 Alt+ z sends you to basecamp, ALt + x sends you to studyguide/start lesson, and Alt + c sends you to the menu.
@@ -14,3 +13,7 @@ ui overhaul (WIP)
 general optiizations/qol stuff (WIP)
 unlimited coins (not a WIP)
 idk i'll think of more things :)
+
+NOTES:
+the eaglercraft file dissapeared and my laptop is being laggy as shit with it. for now it is gone but it will be back.
+sorry :(
