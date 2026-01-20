@@ -1,0 +1,143 @@
+// ==UserScript==
+// @name         Font selector
+// @namespace    http://tampermonkey.net/
+// @version      2.0
+// @description  Alt+W to open menu
+// @author       WOB
+// @match        https://g.myascendmath.com/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const fonts = {
+        '8-Bit Retro': 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap',
+        'Modern Clean': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap',
+        'Bungee': 'https://fonts.googleapis.com/css2?family=Bungee&display=swap',
+        'Russo One': 'https://fonts.googleapis.com/css2?family=Russo+One&display=swap',
+        'Creepster': 'https://fonts.googleapis.com/css2?family=Creepster&display=swap'
+    };
+
+    // 1. Create Menu UI
+    const menu = document.createElement('div');
+    menu.id = 'sigma-font-menu';
+    Object.assign(menu.style, {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: '#0a0a0a',
+        border: '3px solid #00FFFF',
+        padding: '25px',
+        zIndex: '10000',
+        display: 'none',
+        flexDirection: 'column',
+        gap: '12px',
+        borderRadius: '15px',
+        boxShadow: '0 0 30px rgba(0, 255, 255, 0.6)',
+        color: 'white',
+        textAlign: 'center',
+        minWidth: '200px'
+    });
+
+    menu.innerHTML = `<h2 style="margin:0 0 10px 0; font-family: sans-serif; color:#00FFFF; letter-spacing:2px;">FONT HUD</h2>`;
+
+    // 2. Add Selection Buttons
+    Object.keys(fonts).forEach(fontName => {
+        const btn = document.createElement('button');
+        btn.innerText = fontName;
+        Object.assign(btn.style, {
+            padding: '12px',
+            cursor: 'pointer',
+            backgroundColor: '#1a1a1a',
+            color: 'white',
+            border: '1px solid #00FFFF',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            transition: '0.3s'
+        });
+
+        btn.onmouseover = () => { btn.style.backgroundColor = '#00FFFF'; btn.style.color = '#000'; };
+        btn.onmouseout = () => { btn.style.backgroundColor = '#1a1a1a'; btn.style.color = 'white'; };
+        btn.onclick = () => { applyFont(fontName); menu.style.display = 'none'; };
+        menu.appendChild(btn);
+    });
+
+    // 3. Add the DEFAULT (Reset) Button
+    const resetBtn = document.createElement('button');
+    resetBtn.innerText = "DEFAULT (Reset)";
+    Object.assign(resetBtn.style, {
+        marginTop: '10px',
+        padding: '10px',
+        cursor: 'pointer',
+        backgroundColor: '#440000',
+        color: '#FF0000',
+        border: '1px solid #FF0000',
+        borderRadius: '8px',
+        fontSize: '12px',
+        fontWeight: 'bold'
+    });
+    resetBtn.onclick = () => {
+        const link = document.getElementById('sigma-font-link');
+        const style = document.getElementById('sigma-font-style');
+        if (link) link.remove();
+        if (style) style.remove();
+        localStorage.removeItem('sigma-preferred-font');
+        menu.style.display = 'none';
+        console.log("[Sigma] Reverted to default site fonts.");
+    };
+    menu.appendChild(resetBtn);
+
+    document.body.appendChild(menu);
+
+    // 4. Font Application Logic
+    const applyFont = (name) => {
+        const fontMapName = {
+            '8-Bit Retro': 'Press Start 2P',
+            'Modern Clean': 'Montserrat',
+            'Bungee': 'Bungee',
+            'Russo One': 'Russo One',
+            'Creepster': 'Creepster'
+        };
+
+        const cssName = fontMapName[name];
+
+        // Link Handling
+        let link = document.getElementById('sigma-font-link');
+        if (link) link.remove();
+        link = document.createElement('link');
+        link.id = 'sigma-font-link';
+        link.rel = 'stylesheet';
+        link.href = fonts[name];
+        document.head.appendChild(link);
+
+        // Style Handling
+        let style = document.getElementById('sigma-font-style');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'sigma-font-style';
+            document.head.appendChild(style);
+        }
+
+        // Custom rule for 8-bit to make it smaller (otherwise it's huge)
+        const sizeAdjust = (cssName === 'Press Start 2P') ? 'font-size: 12px !important;' : '';
+
+        style.innerHTML = `* { font-family: '${cssName}', sans-serif !important; ${sizeAdjust} }`;
+        localStorage.setItem('sigma-preferred-font', name);
+    };
+
+    // 5. Hotkey Listener (Alt + W)
+    window.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key.toLowerCase() === 'w') {
+            e.preventDefault();
+            menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+        }
+    });
+
+    // 6. Load Saved Preference
+    const saved = localStorage.getItem('sigma-preferred-font');
+    if (saved && fonts[saved]) applyFont(saved);
+
+})();
