@@ -1,0 +1,157 @@
+// ==UserScript==
+// @name         basecamp stuff
+// @namespace    http://tampermonkey.net/
+// @version      5.0
+// @description  basecamp STufuf
+// @author       WOB
+// @match        https://g.myascendmath.com/*
+// @grant        none
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    console.log("%c[ogga] thingy working now", "color: #00FFFF; font-weight: bold;");
+
+    // --- 1. SMART FIREWALL ---
+    const originalOpen = window.XMLHttpRequest.prototype.open;
+    window.XMLHttpRequest.prototype.open = function(method, url) {
+        this._url = url;
+        return originalOpen.apply(this, arguments);
+    };
+
+    const originalSend = window.XMLHttpRequest.prototype.send;
+    window.XMLHttpRequest.prototype.send = function(body) {
+        if (this._url && (this._url.includes("updateBasecamp") || this._url.includes("PauseData"))) {
+            Object.defineProperty(this, 'readyState', {get: () => 4});
+            Object.defineProperty(this, 'status', {get: () => 200});
+            Object.defineProperty(this, 'responseText', {get: () => '{"valid":true,"authorized":true,"timeRemaining":99999,"studentPaused":false,"doneForDay":false}'});
+            this.dispatchEvent(new Event('load'));
+            return;
+        }
+        return originalSend.apply(this, arguments);
+    };
+
+    // --- 2. PERFORMANCE ENGINE ---
+    const boostFPS = () => {
+        if (window.createjs && window.createjs.Ticker) {
+            window.createjs.Ticker.framerate = 80;
+            window.createjs.Ticker.setFPS(80);
+            window.createjs.Ticker.timingMode = window.createjs.Ticker.RAF;
+            return true;
+        }
+        return false;
+    };
+
+    // --- 3. VARIABLE LOCKS & STATS ---
+    const applyVariables = () => {
+        try {
+            Object.defineProperties(window, {
+                'doneForDay': { get: () => false, set: () => {}, configurable: false },
+                'availSeconds': { get: () => 99999, set: () => {}, configurable: false },
+                'idleTime': { get: () => 0, set: () => {}, configurable: false }
+            });
+        } catch(e) {}
+
+        if (typeof window.bcdATime !== 'undefined') {
+            window.bcdATime = "120";
+            window.unparsedTime = "120";
+            window.timeSpent = 0;
+        }
+    };
+
+    // --- 4. FUNCTION BYPASSES ---
+    const initBypasses = () => {
+        const noop = () => false;
+
+        window.updateLocalTime = noop;
+        window.checkTime = noop;
+
+        window.startTimer = () => {
+            const pane = document.getElementById('tutorialPane');
+            if (pane) pane.remove();
+            return true;
+        };
+
+        window.checkAndShowPauseStudentAlert = noop;
+        window.disableButtons = noop;
+
+        try {
+            if (window.parent) {
+                window.parent.checkAndShowPauseStudentAlert = noop;
+                window.parent.startTimer = window.startTimer;
+            }
+        } catch(e) {}
+
+        if (typeof window.comingSoon === 'function' && !window.comingSoon.isPatched) {
+            window.comingSoon = function(place) {
+                for(let i=3; i<=13; i++) {
+                    if(window.portalName && window.portalName(i) === place) {
+                        window.playGame(i);
+                        break;
+                    }
+                }
+            };
+            window.comingSoon.isPatched = true;
+        }
+    };
+
+    // --- 5. UI UPDATER & GAME-START DETECTION ---
+    const updateUI = () => {
+        const elements = {
+            'aTimeData': '2:00',
+            'tTimeData': '999',
+            'rankDisplay': 'idkwhattoputhere'
+        };
+
+        for (let [id, val] of Object.entries(elements)) {
+            const el = document.getElementById(id);
+            if (el && el.innerText !== val) {
+                el.innerText = val;
+            }
+        }
+
+        // Detection Logic: Only remove if gameRunning is true
+        if (window.gameRunning === true) {
+            const pane = document.getElementById('tutorialPane');
+            if (pane && !pane.dataset.markedForDeath) {
+                pane.dataset.markedForDeath = "true";
+                setTimeout(() => {
+                    const target = document.getElementById('tutorialPane');
+                    if (target) target.remove();
+                    console.log("[System] Game start detected: Tutorial removed.");
+                }, 500);
+            }
+        }
+    };
+
+    // --- 6. THE WATCHDOG ---
+    const observer = new MutationObserver(() => {
+        boostFPS();
+        applyVariables();
+        initBypasses();
+        updateUI();
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+
+    // --- 7. INITIALIZATION SEQUENCE ---
+    setInterval(() => { window.idleTime = 0; }, 1000);
+
+    const tickerCheck = setInterval(() => {
+        if (boostFPS()) clearInterval(tickerCheck);
+    }, 500);
+
+    window.addEventListener('load', () => {
+        boostFPS();
+        applyVariables();
+        initBypasses();
+
+        setTimeout(() => {
+            applyVariables();
+            initBypasses();
+            updateUI();
+        }, 1000);
+    });
+
+})();
